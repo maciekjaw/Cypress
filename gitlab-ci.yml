@@ -1,0 +1,33 @@
+stages:
+  - build
+  - test
+  - artefact
+  - send raport
+  - summary
+
+variables:
+  npm_config_cache: '$CI_PROJECT_DIR/.npm'
+  CYPRESS_CACHE_FOLDER: '$CI_PROJECT_DIR/cache/Cypress'
+  CYPRESS_REPORT_FOLDER: '$CI_PROJECT_DIR/cache/Cypress'
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .cache/*
+    - cache/Cypress
+    - node_modules
+    - build
+
+install:
+  image: cypress/browsers:node12.14.1-chrome85-ff81
+  stage: build
+  script:
+    - npm ci
+
+ui-chrome-tests:
+  image: cypress/browsers:node12.14.1-chrome85-ff81
+  stage: test
+  script:
+    - npm ci
+    - npm run start:ci &
+    - ./node_modules/.bin/cypress run -s cypress/integration/2-advanced-examples/*spec.js --reporter junit
